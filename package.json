@@ -1,0 +1,23 @@
+{
+  "name": "linebeaconjs",
+  "version": "1.0.0",
+  "description": "beaconewithwss",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "line",
+    "bot",
+    "messaging-api"
+  ],
+  "author": "Sharainwy",
+  "license": "ISC",
+  "dependencies": {
+    "@line/bot-sdk": "^6.2.1",
+    "express": "^4.16.3",
+    "mongodb": "^6.0.0",
+    "ws": "^8.13.0"
+  }
+}
