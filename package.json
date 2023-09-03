@@ -17,7 +17,7 @@
   "dependencies": {
     "@line/bot-sdk": "^6.2.1",
     "express": "^4.16.3",
-    "mongodb": "^6.0.0",
+    "mongodb": "^4.4.0",
     "ws": "^8.13.0"
   }
 }
