@@ -101,8 +101,10 @@ async function handleEvent(event) {
       if (message.type === 'text') {
         const text = message.text.trim();
         if (text === 'ลงทะเบียน') {
-          
           return replyText(event.replyToken, 'กรุณาพิมพ์ชื่อและอาชีพของคุณ (แยกบรรทัด)');
+        }
+        if (text === 'ลบข้อมูล') {
+          return deleteUserData(UserID, event.replyToken);
         }
         const registrationData = text.split('\n');
         if (registrationData.length === 3) {
@@ -137,9 +139,7 @@ async function handleEvent(event) {
           } finally {
             await clientdb.close();
           }
-        } else {
-          return replyText(event.replyToken, 'กรุณากรอกข้อมูลให้ถูกต้อง (กรุณาแยกชื่อและตำแหน่งแบบเว้นบรรทัด)');
-        }
+        } 
       }
 
       switch (message.type) {
@@ -189,6 +189,26 @@ async function handleEvent(event) {
 } catch (error) {
   console.error('Error handling event and saving to MongoDB:', error);
 }
+}
+
+async function deleteUserData(userId, replyToken) {
+  const clientdb = new MongoClient(mongoURL, { useNewUrlParser: true, useUnifiedTopology: true });
+
+  try {
+    await clientdb.connect();
+    const database = clientdb.db();
+    const registrationCollection = database.collection('registration');
+
+    const result = await registrationCollection.deleteOne({ userId: userId });
+
+    if (result.deletedCount === 1) {
+      return replyText(replyToken, 'ลบข้อมูลของคุณเรียบร้อยแล้ว');
+    } else {
+      return replyText(replyToken, 'ไม่พบข้อมูลของคุณในระบบ');
+    }
+  } finally {
+    await clientdb.close();
+  }
 }
 
 function handleText(message, replyToken) {
