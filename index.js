@@ -79,7 +79,7 @@ async function handleEvent(event) {
     const userProfile = await userProfileCollection.findOne({ userId: event.source.userId });
     if (userProfile) {
       const dataToSend = {
-        type: 'message',
+        type: 'beacon',
         userId: userProfile.userId,
         displayName: userProfile.name,
         pictureUrl: userProfile.pictureUrl,
