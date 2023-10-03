@@ -77,7 +77,7 @@ async function handleEvent(event) {
 
     const database = clientdb.db('mydb');
     const userProfileCollection = database.collection('liff-user');
-    const userProfile = await userProfileCollection.findOne({ userId: event.source.userId });
+    const userProfile = await userProfileCollection.findOne({ userId: UserID});
     if (userProfile) {
       const dataToSend = {
         type: 'beacon',
