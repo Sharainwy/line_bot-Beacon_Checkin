@@ -77,15 +77,15 @@ async function handleEvent(event) {
 
     const database = clientdb.db('mydb');
     const userProfileCollection = database.collection('liff-user');
-    const userProfile = await userProfileCollection.findOne({ userId: UserID});
+    const userProfile = await userProfileCollection.findOne({ userId: event.source.userId });
     if (userProfile) {
       const dataToSend = {
         type: 'beacon',
         userId: userProfile.userId,
-        displayName: userProfile.name,
-        pictureUrl: userProfile.pictureUrl,
-        statusMessage: userProfile.occupation,     
-        occupplace: userProfile.jobdescription,
+        displayName: userProfile.fristname,
+        pictureUrl: userProfile.picture,
+        statusMessage: userProfile.position,     
+        occupplace: userProfile.location,
       };
       wss.clients.forEach(async (client) => {
         client.send(JSON.stringify(dataToSend));
