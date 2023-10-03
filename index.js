@@ -75,7 +75,7 @@ async function handleEvent(event) {
 
     await clientdb.connect();
 
-    const database = client.db('mydb');
+    const database = clientdb.db('mydb');
     const userProfileCollection = database.collection('liff-user');
     const userProfile = await userProfileCollection.findOne({ userId: event.source.userId });
     if (userProfile) {
@@ -99,54 +99,53 @@ async function handleEvent(event) {
       const msgtype = event.type;
       const Rev = event.message.type;
       console.log('UserID : ' + UserID + '\nEvent : ' + msgtype + '  type : ' + Rev);
-      if (message.type === 'text') {
-        const text = message.text.trim();
-        if (text === 'ลงทะเบียน') {
-          return replyText(event.replyToken, 'กรุณาพิมพ์ชื่อและอาชีพของคุณ (แยกบรรทัด)');
-        }
-        if (text === 'ลบข้อมูล') {
-          return deleteUserData(UserID, event.replyToken);
-        }
-        const registrationData = text.split('\n');
-        if (registrationData.length === 3) {
-          const [name, occupation,jobdescription] = registrationData;
-          const clientdb = new MongoClient(mongoURL, { useNewUrlParser: true, useUnifiedTopology: true });
-          try {
+      // if (message.type === 'text') {
+      //   const text = message.text.trim();
+      //   if (text === 'ลงทะเบียน') {
+      //     return replyText(event.replyToken, 'กรุณาพิมพ์ชื่อและอาชีพของคุณ (แยกบรรทัด)');
+      //   }
+      //   if (text === 'ลบข้อมูล') {
+      //     return deleteUserData(UserID, event.replyToken);
+      //   }
+      //   const registrationData = text.split('\n');
+      //   if (registrationData.length === 3) {
+      //     const [name, occupation,jobdescription] = registrationData;
+      //     const clientdb = new MongoClient(mongoURL, { useNewUrlParser: true, useUnifiedTopology: true });
+      //     try {
 
-            await clientdb.connect();
-            const database = client.db('mydb');
-            const registrationCollection = database.collection('liff-user');
+      //       await clientdb.connect();
+      //       const database = client.db('mydb');
+      //       const registrationCollection = database.collection('liff-user');
 
-            const existingRegistration = await registrationCollection.findOne({ userId: UserID });
+      //       const existingRegistration = await registrationCollection.findOne({ userId: UserID });
 
-            if (existingRegistration) {
-              return replyText(event.replyToken, 'คุณได้ลงทะเบียนข้อมูลแล้ว');
-            } else {
-              const profile = await client.getProfile(UserID);
-              const registrationDocument = {
-                name,
-                occupation,
-                jobdescription,
-                userId: UserID,
-                displayName: profile.displayName,
-                pictureUrl: profile.pictureUrl,
-                statusMessage: profile.statusMessage,
-              };
+      //       if (existingRegistration) {
+      //         return replyText(event.replyToken, 'คุณได้ลงทะเบียนข้อมูลแล้ว');
+      //       } else {
+      //         const profile = await client.getProfile(UserID);
+      //         const registrationDocument = {
+      //           name,
+      //           occupation,
+      //           jobdescription,
+      //           userId: UserID,
+      //           displayName: profile.displayName,
+      //           pictureUrl: profile.pictureUrl,
+      //           statusMessage: profile.statusMessage,
+      //         };
               
-              await registrationCollection.insertOne(registrationDocument);
+      //         await registrationCollection.insertOne(registrationDocument);
               
-              return replyText(event.replyToken, 'ข้อมูลของคุณถูกบันทึกเรียบร้อยแล้ว');
-            }
+      //         return replyText(event.replyToken, 'ข้อมูลของคุณถูกบันทึกเรียบร้อยแล้ว');
+      //       }
             
-          } finally {
-            await clientdb.close();
-          }
-        } 
-      }
-
+      //     } finally {
+      //       await clientdb.close();
+      //     }
+      //   } 
+      // }
       switch (message.type) {
         case 'text':
-          //return handleText(message, event.replyToken);
+          return handleText(message, event.replyToken);
         case 'image':
           return handleImage(message, event.replyToken);
         case 'video':
@@ -214,7 +213,7 @@ async function deleteUserData(userId, replyToken) {
 }
 
 function handleText(message, replyToken) {
-  //return replyText(replyToken, message.text);
+  return replyText(replyToken, message.text);
 }
 function handleImage(message, replyToken) {
   return replyText(replyToken, 'Got Image');
