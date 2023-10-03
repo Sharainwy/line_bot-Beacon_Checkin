@@ -82,7 +82,8 @@ async function handleEvent(event) {
       const dataToSend = {
         type: 'beacon',
         userId: userProfile.userId,
-        displayName: userProfile.fristname,
+        displayName: userProfile.firstname,
+        Linename: userProfile.displayName,
         pictureUrl: userProfile.picture,
         statusMessage: userProfile.position,     
         occupplace: userProfile.location,
