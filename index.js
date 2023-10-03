@@ -74,8 +74,9 @@ async function handleEvent(event) {
     const clientdb = new MongoClient(mongoURL, { useNewUrlParser: true, useUnifiedTopology: true });
 
     await clientdb.connect();
-    const database = clientdb.db();
-    const userProfileCollection = database.collection('registration');
+
+    const database = client.db('mydb');
+    const userProfileCollection = database.collection('liff-user');
     const userProfile = await userProfileCollection.findOne({ userId: event.source.userId });
     if (userProfile) {
       const dataToSend = {
@@ -111,9 +112,10 @@ async function handleEvent(event) {
           const [name, occupation,jobdescription] = registrationData;
           const clientdb = new MongoClient(mongoURL, { useNewUrlParser: true, useUnifiedTopology: true });
           try {
+
             await clientdb.connect();
-            const database = clientdb.db();
-            const registrationCollection = database.collection('registration');
+            const database = client.db('mydb');
+            const registrationCollection = database.collection('liff-user');
 
             const existingRegistration = await registrationCollection.findOne({ userId: UserID });
 
