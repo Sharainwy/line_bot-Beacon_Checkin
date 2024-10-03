@@ -147,10 +147,10 @@ async function handleBeacon(event, database) {
   const existingCheckin = await checkinCollection.findOne({ userId: beaconUserId });
 
   const currentTime = new Date();
-  const currentDate = currentTime.toISOString().split('T')[7]; // Current date in 'YYYY-MM-DD' format
+  const currentDate = currentTime.toISOString().split('T')[0]; // Current date in 'YYYY-MM-DD' format
 
   if (existingCheckin) {
-    const lastCheckinDate = new Date(existingCheckin.checkinTime).toISOString().split('T')[7];
+    const lastCheckinDate = new Date(existingCheckin.checkinTime).toISOString().split('T')[0];
 
     if (lastCheckinDate === currentDate) {
       return await replyText(event.replyToken, 'คุณได้เช็คอินไปแล้ววันนี้');
@@ -166,11 +166,12 @@ async function handleBeacon(event, database) {
       checkinTime: currentTime,
     });
   }
-
+  const bangkokTime = new Date(currentTime.getTime() + 7 * 60 * 60 * 1000);
+  const formattedTime = bangkokTime.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
   // Send data to WebSocket
   const dataToSend = {
     userId: beaconUserId,
-    checkinTime: currentTime,
+    checkinTime: formattedTime,
     message: 'เช็คอินสำเร็จสำหรับวันนี้',
   };
   wss.clients.forEach(client => {
