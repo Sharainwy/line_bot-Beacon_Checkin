@@ -140,6 +140,7 @@ async function handleMessage(event, database) {
   }
 }
 
+
 // Handle beacon events
 async function handleBeacon(event, database) {
     const beaconUserId = event.source.userId;
@@ -147,24 +148,25 @@ async function handleBeacon(event, database) {
     const existingCheckin = await checkinCollection.findOne({ userId: beaconUserId });
 
     const currentTime = new Date();
-    const bangkokTime = new Date(currentTime.getTime() + 7 * 1000); // เพิ่มเวลา 7 ชั่วโมง
+    const bangkokTime = new Date(currentTime.getTime() + 7 * 60 * 60 * 1000); // เพิ่มเวลา 7 ชั่วโมง
     const currentCheckinDate = bangkokTime.toISOString().split('T')[0]; // Current date in 'YYYY-MM-DD' format
     
     if (existingCheckin) {
-        const lastCheckinDate = new Date(existingCheckin.checkinTime)bangkokTime.toISOString().split('T')[0]; // Last check-in date
+        const lastCheckinDate = new Date(existingCheckin.checkinTime).toISOString().split('T')[0]; // Last check-in date
 
+        // เปรียบเทียบวันที่
         if (lastCheckinDate === currentCheckinDate) {
             return await replyText(event.replyToken, 'คุณได้เช็คอินไปแล้ววันนี้');
         } else {
             await checkinCollection.updateOne(
                 { userId: beaconUserId },
-                { $set: { checkinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) } } // บันทึกเวลาในรูปแบบ ISO
+                { $set: { checkinTime: bangkokTime.toISOString() } } // บันทึกเวลาในรูปแบบ ISO
             );
         }
     } else {
         await checkinCollection.insertOne({
             userId: beaconUserId,
-            checkinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }), // บันทึกเวลาในรูปแบบ ISO
+            checkinTime: bangkokTime.toISOString(), // บันทึกเวลาในรูปแบบ ISO
         });
     }
     
@@ -182,6 +184,7 @@ async function handleBeacon(event, database) {
 
     return await replyText(event.replyToken, `เช็คอินสำเร็จสำหรับวันนี้ เวลา: ${bangkokTime.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })}`);
 }
+
 
 // Reply to different message types
 async function handleText(message, replyToken) {
