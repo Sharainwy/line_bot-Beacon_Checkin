@@ -207,14 +207,14 @@ async function handleSticker(message, replyToken) {
   return replyText(replyToken, 'Got Sticker');
 }
 
-// WebSocket connection handling
 wss.on('connection', (ws) => {
   console.log('WebSocket connected');
-
-  ws.on('close', () => {
-    console.log('WebSocket disconnected');
-  });
 });
+
+wss.on('close', () => {
+    console.log('WebSocket disconnected');
+    // เพิ่มการจัดการเมื่อมีการตัดการเชื่อมต่อ WebSocket ที่นี่
+  });
 
 const port = config.port;
 
