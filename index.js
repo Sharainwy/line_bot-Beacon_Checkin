@@ -149,7 +149,7 @@ async function handleBeacon(event, database) {
 
     const currentTime = new Date();
     //const bangkokTime = new Date(currentTime.getTime() + 7 * 1000); // เพิ่มเวลา 7 ชั่วโมง
-    const currentCheckinDate = bangkokTime.toLocaleString().split('T')[0]; // Current date in 'YYYY-MM-DD' format
+    const currentCheckinDate = currentTime.toLocaleString().split('T')[0]; // Current date in 'YYYY-MM-DD' format
     
     if (existingCheckin) {
         const lastCheckinDate = new Date(existingCheckin.checkinTime).toLocaleString().split('T')[+7]; // Last check-in date
