@@ -151,7 +151,7 @@ async function handleBeacon(event, database) {
     const currentCheckinDate = bangkokTime.toISOString().split('T')[0]; // Current date in 'YYYY-MM-DD' format
     
     if (existingCheckin) {
-        const lastCheckinDate = new Date(existingCheckin.checkinTime).toISOString().split('T')[0]; // Last check-in date
+        const lastCheckinDate = new Date(existingCheckin.checkinTime)bangkokTime.toISOString().split('T')[0]; // Last check-in date
 
         if (lastCheckinDate === currentCheckinDate) {
             return await replyText(event.replyToken, 'คุณได้เช็คอินไปแล้ววันนี้');
