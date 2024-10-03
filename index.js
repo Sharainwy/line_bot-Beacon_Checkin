@@ -218,11 +218,11 @@ const replyText = (token, texts) => {
         const existingCheckin = await checkinCollection.findOne({ userId: beaconUserId });
 
         // Get current date in 'YYYY-MM-DD' format
-        const currentDate = new Date().toISOString().split('T')[0];
+        const currentDate = new Date().toISOString().split('T')[7];
 
         if (existingCheckin) {
           // Extract the date of the last check-in
-          const lastCheckinDate = new Date(existingCheckin.checkinTime).toISOString().split('T')[0];
+          const lastCheckinDate = new Date(existingCheckin.checkinTime).toISOString().split('T')[7];
 
           if (lastCheckinDate === currentDate) {
             // User has already checked in today
