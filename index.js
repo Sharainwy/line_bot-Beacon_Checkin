@@ -1,5 +1,5 @@
 'use strict';
-//
+
 const line = require('@line/bot-sdk');
 const express = require('express');
 const config = require('./config.json');
@@ -12,95 +12,55 @@ const app = express();
 const server = http.createServer(app); 
 const wss = new WebSocket.Server({ server });
 
+const mongoURL = 'mongodb+srv://Sharainwy:Mindbnk48@shar.xu2urv6.mongodb.net/'; 
 
 async function getProfile(userId) {
   try {
-    const profile = await client.getProfile(userId);
-    return profile;
+    return await client.getProfile(userId);
   } catch (error) {
     console.error('Error getting profile:', error);
     return null;
   }
 }
 
-const mongoURL = 'mongodb+srv://Sharainwy:Mindbnk48@shar.xu2urv6.mongodb.net/'; 
-
-// webhook callback
-app.post('/webhook', line.middleware(config), (req, res) => {
-  // req.body.events should be an array of events
+// Webhook callback
+app.post('/webhook', line.middleware(config), async (req, res) => {
   if (!Array.isArray(req.body.events)) {
     return res.status(500).end();
   }
-  // handle events separately
-  Promise.all(req.body.events.map(event => {
-    console.log('event', event);
-    // check verify webhook event
-    if (event.replyToken === '00000000000000000000000000000000' ||
-      event.replyToken === 'ffffffffffffffffffffffffffffffff') {
-      return;
-    }
-    return handleEvent(event);
-  }))
-    .then(() => res.end())
-    .catch((err) => {
-      console.error(err);
-      res.status(500).end();
-    });
-});
 
-
-app.get('/',  (req, res) => {
   try {
-    
-    res.status(200).send('OK Connect');
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('An error occurred');
+    await Promise.all(req.body.events.map(event => handleEvent(event)));
+    res.end();
+  } catch (err) {
+    console.error(err);
+    res.status(500).end();
   }
 });
 
-// simple reply function
+app.get('/', (req, res) => {
+  res.status(200).send('OK Connect');
+});
+
+// Simple reply function
 const replyText = (token, texts) => {
   texts = Array.isArray(texts) ? texts : [texts];
   return client.replyMessage(
     token,
-    texts.map((text) => ({ type: 'text', text }))
+    texts.map(text => ({ type: 'text', text }))
   );
 };
 
-// callback function to handle a single event
-// async function handleEvent(event) {
-//   try {
-//     const clientdb = new MongoClient(mongoURL, { useNewUrlParser: true, useUnifiedTopology: true });
+// Handle events
+async function handleEvent(event) {
+  const clientdb = new MongoClient(mongoURL, { useNewUrlParser: true, useUnifiedTopology: true });
+  await clientdb.connect();
 
-//     await clientdb.connect();
-
-//     const database = clientdb.db('mydb');
-//     const userProfileCollection = database.collection('liff-user');
-//     const userProfile = await userProfileCollection.findOne({ userId: event.source.userId });
-//     if (userProfile) {
-//       const dataToSend = {
-//         type: 'beacon',
-//         userId: userProfile.userId,
-//         displayName: userProfile.firstname,
-//         Linename: userProfile.displayName,
-//         pictureUrl: userProfile.picture,
-//         statusMessage: userProfile.position,     
-//         occupplace: userProfile.location,
-//       };
-//       wss.clients.forEach(async (client) => {
-//         client.send(JSON.stringify(dataToSend));
-//       });
-//     }
-  async function handleEvent(event) {
   try {
-    const clientdb = new MongoClient(mongoURL, { useNewUrlParser: true, useUnifiedTopology: true });
-    await clientdb.connect();
-    
     const database = clientdb.db('mydb');
     const userProfileCollection = database.collection('liff-user');
-    
     const userProfile = await userProfileCollection.findOne({ userId: event.source.userId });
+
     if (userProfile) {
       const dataToSend = {
         type: 'beacon',
@@ -111,243 +71,153 @@ const replyText = (token, texts) => {
         statusMessage: userProfile.position,
         occupplace: userProfile.location,
       };
-      
-      wss.clients.forEach(async (client) => {
-        client.send(JSON.stringify(dataToSend));
+      // Send data to all connected WebSocket clients
+      wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(dataToSend));
+        }
       });
     }
 
-
-  switch (event.type) {
-    case 'message':
-      const message = event.message;
-      const UserID = event.source.userId;
-      const msgtype = event.type;
-      const Rev = event.message.type;
-      console.log('UserID : ' + UserID + '\nEvent : ' + msgtype + '  type : ' + Rev);
-      // if (message.type === 'text') {
-      //   const text = message.text.trim();
-      //   if (text === 'ลงทะเบียน') {
-      //     return replyText(event.replyToken, 'กรุณาพิมพ์ชื่อและอาชีพของคุณ (แยกบรรทัด)');
-      //   }
-      //   if (text === 'ลบข้อมูล') {
-      //     return deleteUserData(UserID, event.replyToken);
-      //   }
-      //   const registrationData = text.split('\n');
-      //   if (registrationData.length === 3) {
-      //     const [name, occupation,jobdescription] = registrationData;
-      //     const clientdb = new MongoClient(mongoURL, { useNewUrlParser: true, useUnifiedTopology: true });
-      //     try {
-
-      //       await clientdb.connect();
-      //       const database = client.db('mydb');
-      //       const registrationCollection = database.collection('liff-user');
-
-      //       const existingRegistration = await registrationCollection.findOne({ userId: UserID });
-
-      //       if (existingRegistration) {
-      //         return replyText(event.replyToken, 'คุณได้ลงทะเบียนข้อมูลแล้ว');
-      //       } else {
-      //         const profile = await client.getProfile(UserID);
-      //         const registrationDocument = {
-      //           name,
-      //           occupation,
-      //           jobdescription,
-      //           userId: UserID,
-      //           displayName: profile.displayName,
-      //           pictureUrl: profile.pictureUrl,
-      //           statusMessage: profile.statusMessage,
-      //         };
-              
-      //         await registrationCollection.insertOne(registrationDocument);
-              
-      //         return replyText(event.replyToken, 'ข้อมูลของคุณถูกบันทึกเรียบร้อยแล้ว');
-      //       }
-            
-      //     } finally {
-      //       await clientdb.close();
-      //     }
-      //   } 
-      // }
-      switch (message.type) {
-        case 'text':
-          return handleText(message, event.replyToken);
-        case 'image':
-          return handleImage(message, event.replyToken);
-        case 'video':
-          return handleVideo(message, event.replyToken);
-        case 'audio':
-          return handleAudio(message, event.replyToken);
-        case 'location':
-          return handleLocation(message, event.replyToken);
-        case 'sticker':
-          return handleSticker(message, event.replyToken);
-        default:
-          throw new Error(`Unknown message: ${JSON.stringify(message)}`);
-      }
-
-    case 'follow':
-      return replyText(event.replyToken, 'Got followed event');
-
-    case 'unfollow':
-      return console.log(`Unfollowed this bot: ${JSON.stringify(event)}`);
-
-    case 'join':
-      return replyText(event.replyToken, `Joined ${event.source.type}`);
-
-    case 'leave':
-      return console.log(`Left: ${JSON.stringify(event)}`);
-
-    case 'postback':
-      let data = event.postback.data;
-      return replyText(event.replyToken, `Got postback: ${data}`);
-
-    case 'beacon':
-      // const dm = `${Buffer.from(event.beacon.dm || '', 'hex').toString('utf8')}`;
-      // return replyText(event.replyToken, `${event.beacon.type} beacon hwid : ${event.beacon.hwid} with device message = ${dm}`);
-    //   const beacontype = event.type;
-    //   const beaconUserId = event.source.userId;
-    //   console.log('UserID : ' + beaconUserId + '\nEvent : ' + beacontype + '  type : ' + event.beacon.type);
-
-    //   return replyText(event.replyToken, 'Hello\nBeacon Status : ' + beacontype);
-    // default:
-    //   throw new Error(`Unknown event: ${JSON.stringify(event)}`);
-
-     const beaconUserId = event.source.userId;
-        const checkinCollection = database.collection('checkins');
-        const existingCheckin = await checkinCollection.findOne({ userId: beaconUserId });
-
-        // Get current date in 'YYYY-MM-DD' format
-        const currentDate = new Date().toISOString().split('T')[7];
-
-        if (existingCheckin) {
-          // Extract the date of the last check-in
-          const lastCheckinDate = new Date(existingCheckin.checkinTime).toISOString().split('T')[7];
-
-          if (lastCheckinDate === currentDate) {
-            // User has already checked in today
-            return replyText(event.replyToken, 'คุณได้เช็คอินไปแล้ววันนี้');
-          } else {
-            // Allow check-in if it's a new day
-            const currentTime = new Date();
-            await checkinCollection.updateOne(
-              { userId: beaconUserId },
-              { $set: { checkinTime: currentTime } }
-            );
-
-            // Send data to WebSocket (only for new check-ins)
-            const dataToSend = {
-              userId: beaconUserId,
-              checkinTime: currentTime,
-              message: 'เช็คอินสำเร็จสำหรับวันนี้'
-            };
-            wss.clients.forEach(async (client) => {
-              client.send(JSON.stringify(dataToSend));
-            });
-
-            return replyText(event.replyToken, `เช็คอินสำเร็จสำหรับวันนี้ เวลา: ${currentTime}`);
-          }
-        } else {
-          // First time check-in, log the current time
-          const currentTime = new Date();
-          await checkinCollection.insertOne({
-            userId: beaconUserId,
-            checkinTime: currentTime,
-          });
-
-          // Send data to WebSocket (only for new check-ins)
-          const dataToSend = {
-            userId: beaconUserId,
-            checkinTime: currentTime,
-            message: 'เช็คอินสำเร็จสำหรับวันนี้'
-          };
-          wss.clients.forEach(async (client) => {
-            client.send(JSON.stringify(dataToSend));
-          });
-          
-          return replyText(event.replyToken, `เช็คอินสำเร็จสำหรับวันนี้ เวลา: ${currentTime}`);
-        }
-
+    switch (event.type) {
+      case 'message':
+        await handleMessage(event, database);
+        break;
+      case 'follow':
+        await replyText(event.replyToken, 'Got followed event');
+        break;
+      case 'unfollow':
+        console.log(`Unfollowed this bot: ${JSON.stringify(event)}`);
+        break;
+      case 'join':
+        await replyText(event.replyToken, `Joined ${event.source.type}`);
+        break;
+      case 'leave':
+        console.log(`Left: ${JSON.stringify(event)}`);
+        break;
+      case 'postback':
+        await replyText(event.replyToken, `Got postback: ${event.postback.data}`);
+        break;
+      case 'beacon':
+        await handleBeacon(event, database);
+        break;
       default:
         throw new Error(`Unknown event: ${JSON.stringify(event)}`);
-  }
-} catch (error) {
-  console.error('Error handling event and saving to MongoDB:', error);
-}
-    
-}
-
-async function deleteUserData(userId, replyToken) {
-  const clientdb = new MongoClient(mongoURL, { useNewUrlParser: true, useUnifiedTopology: true });
-
-  try {
-    await clientdb.connect();
-    const database = clientdb.db();
-    const registrationCollection = database.collection('registration');
-
-    const result = await registrationCollection.deleteOne({ userId: userId });
-
-    if (result.deletedCount === 1) {
-      return replyText(replyToken, 'ลบข้อมูลของคุณเรียบร้อยแล้ว');
-    } else {
-      return replyText(replyToken, 'ไม่พบข้อมูลของคุณในระบบ');
     }
+  } catch (error) {
+    console.error('Error handling event:', error);
   } finally {
     await clientdb.close();
   }
 }
 
-function handleText(message, replyToken) {
+// Handle message events
+async function handleMessage(event, database) {
+  const message = event.message;
+  const UserID = event.source.userId;
+
+  switch (message.type) {
+    case 'text':
+      await handleText(message, event.replyToken);
+      break;
+    case 'image':
+      await handleImage(message, event.replyToken);
+      break;
+    case 'video':
+      await handleVideo(message, event.replyToken);
+      break;
+    case 'audio':
+      await handleAudio(message, event.replyToken);
+      break;
+    case 'location':
+      await handleLocation(message, event.replyToken);
+      break;
+    case 'sticker':
+      await handleSticker(message, event.replyToken);
+      break;
+    default:
+      throw new Error(`Unknown message type: ${JSON.stringify(message)}`);
+  }
+}
+
+// Handle beacon events
+async function handleBeacon(event, database) {
+  const beaconUserId = event.source.userId;
+  const checkinCollection = database.collection('checkins');
+  const existingCheckin = await checkinCollection.findOne({ userId: beaconUserId });
+
+  const currentTime = new Date();
+  const currentDate = currentTime.toISOString().split('T')[0]; // Current date in 'YYYY-MM-DD' format
+
+  if (existingCheckin) {
+    const lastCheckinDate = new Date(existingCheckin.checkinTime).toISOString().split('T')[0];
+
+    if (lastCheckinDate === currentDate) {
+      return await replyText(event.replyToken, 'คุณได้เช็คอินไปแล้ววันนี้');
+    } else {
+      await checkinCollection.updateOne(
+        { userId: beaconUserId },
+        { $set: { checkinTime: currentTime } }
+      );
+    }
+  } else {
+    await checkinCollection.insertOne({
+      userId: beaconUserId,
+      checkinTime: currentTime,
+    });
+  }
+
+  // Send data to WebSocket
+  const dataToSend = {
+    userId: beaconUserId,
+    checkinTime: currentTime,
+    message: 'เช็คอินสำเร็จสำหรับวันนี้',
+  };
+  wss.clients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(dataToSend));
+    }
+  });
+
+  return await replyText(event.replyToken, `เช็คอินสำเร็จสำหรับวันนี้ เวลา: ${currentTime}`);
+}
+
+// Reply to different message types
+async function handleText(message, replyToken) {
   return replyText(replyToken, message.text);
 }
-function handleImage(message, replyToken) {
+
+async function handleImage(message, replyToken) {
   return replyText(replyToken, 'Got Image');
 }
-function handleVideo(message, replyToken) {
+
+async function handleVideo(message, replyToken) {
   return replyText(replyToken, 'Got Video');
 }
-function handleAudio(message, replyToken) {
+
+async function handleAudio(message, replyToken) {
   return replyText(replyToken, 'Got Audio');
 }
-function handleLocation(message, replyToken) {
+
+async function handleLocation(message, replyToken) {
   return replyText(replyToken, 'Got Location');
 }
-function handleSticker(message, replyToken) {
+
+async function handleSticker(message, replyToken) {
   return replyText(replyToken, 'Got Sticker');
 }
 
+// WebSocket connection handling
 wss.on('connection', (ws) => {
   console.log('WebSocket connected');
-});
-  // รับข้อมูลจากหน้าเว็บผ่าน WebSocket และส่งไปยัง LINE Bot
-  // ws.on('message', async (data) => {
-  //   const message = JSON.parse(data);
-  //   if (message.type === 'beacon') {
-  //     // ขอข้อมูลผู้ใช้จาก LINE Messaging API
-  //     const userProfile = await client.getProfile(message.userId);
-      
-  //     // สร้างข้อมูลที่จะส่งกลับไปยังหน้าเว็บ
-  //     const dataToSend = {
-  //       type: 'beacon',
-  //       text: event.beacon.type,
-  //       userId: userProfile.userId,
-  //       displayName: userProfile.displayName,
-  //       pictureUrl: userProfile.pictureUrl,
-  //       statusMessage: userProfile.statusMessage
-  //     };
 
-  //     // ส่งข้อมูลไปยังหน้าเว็บผ่าน WebSocket
-  //     ws.send(JSON.stringify(dataToSend));
-  //   }
-  // });
-  wss.on('close', () => {
+  ws.on('close', () => {
     console.log('WebSocket disconnected');
-    // เพิ่มการจัดการเมื่อมีการตัดการเชื่อมต่อ WebSocket ที่นี่
   });
-
+});
 
 const port = config.port;
 
 server.listen(port, () => {
-  console.log(`listening on ${port}`);
+  console.log(`Listening on ${port}`);
 });
