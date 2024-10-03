@@ -149,10 +149,10 @@ async function handleBeacon(event, database) {
 
     const currentTime = new Date();
     const bangkokTime = new Date(currentTime.getTime() + 7 * 1000); // เพิ่มเวลา 7 ชั่วโมง
-    const currentCheckinDate = bangkokTime.toISOString().split('T')[0]; // Current date in 'YYYY-MM-DD' format
+    const currentCheckinDate = bangkokTime.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }); // Current date in 'YYYY-MM-DD' format
     
     if (existingCheckin) {
-        const lastCheckinDate = new Date(existingCheckin.checkinTime).toISOString().split('T')[0]; // Last check-in date
+        const lastCheckinDate = new Date(existingCheckin.checkinTime).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }); // Last check-in date
 
         // เปรียบเทียบวันที่
            if (lastCheckinDate === currentCheckinDate) {
