@@ -147,28 +147,32 @@ async function handleBeacon(event, database) {
   const existingCheckin = await checkinCollection.findOne({ userId: beaconUserId });
 
   const currentTime = new Date();
-  const currentDate = currentTime.toISOString().split('T')[0]; // Current date in 'YYYY-MM-DD' format
-  const bangkokTime = new Date(currentTime.getTime() + 7 * 1000);
+  const bangkokTime = new Date(currentTime.getTime() + 7 * 1000); // เพิ่ม 7 ชั่วโมง
   const formattedTime = bangkokTime.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
-  
-  if (existingCheckin) {
-    const lastCheckinDate = new Date(existingCheckin.checkinTime).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
+  const currentDate = bangkokTime.toISOString().split('T')[0]; // วันที่ปัจจุบันในรูปแบบ 'YYYY-MM-DD'
 
-    if (lastCheckinDate === formattedTime) {
+  if (existingCheckin) {
+    // เปลี่ยน checkinTime ที่บันทึกไว้เป็นวันที่
+    const lastCheckinDate = new Date(existingCheckin.checkinTime).toISOString().split('T')[0];
+
+    if (lastCheckinDate === currentDate) {
+      // เช็คอินแล้วในวันนี้
       return await replyText(event.replyToken, 'คุณได้เช็คอินไปแล้ววันนี้');
     } else {
+      // เช็คอินใหม่ในวันที่แตกต่าง
       await checkinCollection.updateOne(
         { userId: beaconUserId },
         { $set: { checkinTime: formattedTime } }
       );
     }
   } else {
+    // เช็คอินครั้งแรก
     await checkinCollection.insertOne({
       userId: beaconUserId,
       checkinTime: formattedTime,
     });
   }
-  
+
   // Send data to WebSocket
   const dataToSend = {
     userId: beaconUserId,
