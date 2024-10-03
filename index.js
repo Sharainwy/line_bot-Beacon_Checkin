@@ -148,7 +148,9 @@ async function handleBeacon(event, database) {
 
   const currentTime = new Date();
   const currentDate = currentTime.toISOString().split('T')[0]; // Current date in 'YYYY-MM-DD' format
-
+  const bangkokTime = new Date(currentTime.getTime() + 7 * 60 * 60 * 1000);
+  const formattedTime = bangkokTime.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
+  
   if (existingCheckin) {
     const lastCheckinDate = new Date(existingCheckin.checkinTime).toISOString().split('T')[0];
 
@@ -157,17 +159,16 @@ async function handleBeacon(event, database) {
     } else {
       await checkinCollection.updateOne(
         { userId: beaconUserId },
-        { $set: { checkinTime: currentTime } }
+        { $set: { checkinTime: formattedTime } }
       );
     }
   } else {
     await checkinCollection.insertOne({
       userId: beaconUserId,
-      checkinTime: currentTime,
+      checkinTime: formattedTime,
     });
   }
-  const bangkokTime = new Date(currentTime.getTime() + 7 * 60 * 60 * 1000);
-  const formattedTime = bangkokTime.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
+  
   // Send data to WebSocket
   const dataToSend = {
     userId: beaconUserId,
