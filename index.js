@@ -155,7 +155,7 @@ async function handleBeacon(event, database) {
     const lastCheckinDate = new Date(existingCheckin.checkinTime).toISOString().split('T')[0];
 
     if (lastCheckinDate === currentDate) {
-      return await replyText(event.replyToken, 'คุณได้เช็คอินไปแล้ววันนี้');
+      //return await replyText(event.replyToken, 'คุณได้เช็คอินไปแล้ววันนี้');
     } else {
       await checkinCollection.updateOne(
         { userId: beaconUserId },
