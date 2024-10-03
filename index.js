@@ -148,14 +148,14 @@ async function handleBeacon(event, database) {
 
   const currentTime = new Date();
   const currentDate = currentTime.toISOString().split('T')[0]; // Current date in 'YYYY-MM-DD' format
-  const bangkokTime = new Date(currentTime.getTime() + 7 * 60 * 60 * 1000);
+  const bangkokTime = new Date(currentTime.getTime() + 7 * 1000);
   const formattedTime = bangkokTime.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
   
   if (existingCheckin) {
     const lastCheckinDate = new Date(existingCheckin.checkinTime).toISOString().split('T')[0];
 
     if (lastCheckinDate === currentDate) {
-      //return await replyText(event.replyToken, 'คุณได้เช็คอินไปแล้ววันนี้');
+      return await replyText(event.replyToken, 'คุณได้เช็คอินไปแล้ววันนี้');
     } else {
       await checkinCollection.updateOne(
         { userId: beaconUserId },
@@ -181,7 +181,7 @@ async function handleBeacon(event, database) {
     }
   });
 
-  return await replyText(event.replyToken, `เช็คอินสำเร็จสำหรับวันนี้ เวลา: ${currentTime}`);
+  return await replyText(event.replyToken, `เช็คอินสำเร็จสำหรับวันนี้ เวลา: ${formattedTime}`);
 }
 
 // Reply to different message types
