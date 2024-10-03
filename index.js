@@ -158,13 +158,13 @@ async function handleBeacon(event, database) {
         } else {
             await checkinCollection.updateOne(
                 { userId: beaconUserId },
-                { $set: { checkinTime: bangkokTime.toISOString() } } // บันทึกเวลาในรูปแบบ ISO
+                { $set: { checkinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) } } // บันทึกเวลาในรูปแบบ ISO
             );
         }
     } else {
         await checkinCollection.insertOne({
             userId: beaconUserId,
-            checkinTime: bangkokTime.toISOString(), // บันทึกเวลาในรูปแบบ ISO
+            checkinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }), // บันทึกเวลาในรูปแบบ ISO
         });
     }
     
