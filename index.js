@@ -195,7 +195,7 @@ async function handleBeacon(event, database) {
     const existingCheckin = await checkinCollection.findOne({ userId: beaconUserId });
 
     const currentTime = new Date();
-    const bangkokTime = new Date(currentTime.getTime() + 7 * 60 * 60 * 1000); // เพิ่มเวลา 7 ชั่วโมง
+    const bangkokTime = new Date(currentTime.getTime() +  60 * 60 * 1000); // เพิ่มเวลา 7 ชั่วโมง
     const currentCheckinDate = bangkokTime.toISOString().split('T')[0]; // Current date in 'YYYY-MM-DD' format
 
     if (existingCheckin) {
