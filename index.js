@@ -198,6 +198,15 @@ async function handleBeacon(event, database) {
     const bangkokTime = new Date(currentTime.getTime() + 7 * 1000); // เพิ่มเวลา 7 ชั่วโมง
     const currentCheckinDate = bangkokTime.toISOString().split('T')[0]; // Current date in 'YYYY-MM-DD' format
 
+    // Get hours and minutes of the current time
+    const hours = bangkokTime.getHours();
+    const minutes = bangkokTime.getMinutes();
+
+    // Check if the current time is between 7:00 AM and 8:45 AM (GMT+7)
+    if (hours < 7 || (hours === 8 && minutes > 45) || hours > 8) {
+        return await replyText(event.replyToken, 'เช็คอินสามารถทำได้ระหว่างเวลา 7:00 - 8:45 น. (GMT+7)');
+    }
+
     if (existingCheckin) {
         const lastCheckinDate = new Date(existingCheckin.checkinTime).toISOString().split('T')[0]; // Last check-in date in 'YYYY-MM-DD'
 
@@ -234,7 +243,6 @@ async function handleBeacon(event, database) {
 
     return await replyText(event.replyToken, `เช็คอินสำเร็จสำหรับวันนี้ เวลา: ${bangkokTime.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })}`);
 }
-
 
 
 // Reply to different message types
