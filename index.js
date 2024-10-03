@@ -158,16 +158,16 @@ async function handleBeacon(event, database) {
            if (lastCheckinDate === currentCheckinDate) {
             const lastCheckinTime = new Date(existingCheckin.checkinTime).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
             return await replyText(event.replyToken, `คุณได้เช็คอินแล้วเมื่อเวลา ${lastCheckinTime}`); }
-        //  else {
-        //     await checkinCollection.updateOne(
-        //         { userId: beaconUserId },
-        //         { $set: { checkinTime: bangkokTime} } // บันทึกเวลาในรูปแบบ ISO
-        //     );
-        // }
+         else {
+            await checkinCollection.updateOne(
+                { userId: beaconUserId },
+                { $set: { checkinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) } } // บันทึกเวลาในรูปแบบ ISO
+            );
+        }
     } else {
         await checkinCollection.insertOne({
             userId: beaconUserId,
-            checkinTime: bangkokTime, // บันทึกเวลาในรูปแบบ ISO
+            checkinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }), // บันทึกเวลาในรูปแบบ ISO
         });
     }
     
