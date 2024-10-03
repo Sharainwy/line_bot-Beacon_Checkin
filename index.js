@@ -147,10 +147,10 @@ async function handleBeacon(event, database) {
   const existingCheckin = await checkinCollection.findOne({ userId: beaconUserId });
 
   const currentTime = new Date();
-  const currentDate = currentTime.toISOString().split('T')[0]; // Current date in 'YYYY-MM-DD' format
+  const currentDate = currentTime.toISOString().split('T')[7]; // Current date in 'YYYY-MM-DD' format
 
   if (existingCheckin) {
-    const lastCheckinDate = new Date(existingCheckin.checkinTime).toISOString().split('T')[0];
+    const lastCheckinDate = new Date(existingCheckin.checkinTime).toISOString().split('T')[7];
 
     if (lastCheckinDate === currentDate) {
       return await replyText(event.replyToken, 'คุณได้เช็คอินไปแล้ววันนี้');
