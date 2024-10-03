@@ -69,14 +69,37 @@ const replyText = (token, texts) => {
 };
 
 // callback function to handle a single event
-async function handleEvent(event) {
+// async function handleEvent(event) {
+//   try {
+//     const clientdb = new MongoClient(mongoURL, { useNewUrlParser: true, useUnifiedTopology: true });
+
+//     await clientdb.connect();
+
+//     const database = clientdb.db('mydb');
+//     const userProfileCollection = database.collection('liff-user');
+//     const userProfile = await userProfileCollection.findOne({ userId: event.source.userId });
+//     if (userProfile) {
+//       const dataToSend = {
+//         type: 'beacon',
+//         userId: userProfile.userId,
+//         displayName: userProfile.firstname,
+//         Linename: userProfile.displayName,
+//         pictureUrl: userProfile.picture,
+//         statusMessage: userProfile.position,     
+//         occupplace: userProfile.location,
+//       };
+//       wss.clients.forEach(async (client) => {
+//         client.send(JSON.stringify(dataToSend));
+//       });
+//     }
+  async function handleEvent(event) {
   try {
     const clientdb = new MongoClient(mongoURL, { useNewUrlParser: true, useUnifiedTopology: true });
-
     await clientdb.connect();
-
+    
     const database = clientdb.db('mydb');
     const userProfileCollection = database.collection('liff-user');
+    
     const userProfile = await userProfileCollection.findOne({ userId: event.source.userId });
     if (userProfile) {
       const dataToSend = {
@@ -85,13 +108,15 @@ async function handleEvent(event) {
         displayName: userProfile.firstname,
         Linename: userProfile.displayName,
         pictureUrl: userProfile.picture,
-        statusMessage: userProfile.position,     
+        statusMessage: userProfile.position,
         occupplace: userProfile.location,
       };
+      
       wss.clients.forEach(async (client) => {
         client.send(JSON.stringify(dataToSend));
       });
     }
+
 
   switch (event.type) {
     case 'message':
@@ -180,17 +205,54 @@ async function handleEvent(event) {
     case 'beacon':
       // const dm = `${Buffer.from(event.beacon.dm || '', 'hex').toString('utf8')}`;
       // return replyText(event.replyToken, `${event.beacon.type} beacon hwid : ${event.beacon.hwid} with device message = ${dm}`);
-      const beacontype = event.type;
-      const beaconUserId = event.source.userId;
-      console.log('UserID : ' + beaconUserId + '\nEvent : ' + beacontype + '  type : ' + event.beacon.type);
+    //   const beacontype = event.type;
+    //   const beaconUserId = event.source.userId;
+    //   console.log('UserID : ' + beaconUserId + '\nEvent : ' + beacontype + '  type : ' + event.beacon.type);
 
-      return replyText(event.replyToken, 'Hello\nBeacon Status : ' + beacontype);
-    default:
-      throw new Error(`Unknown event: ${JSON.stringify(event)}`);
+    //   return replyText(event.replyToken, 'Hello\nBeacon Status : ' + beacontype);
+    // default:
+    //   throw new Error(`Unknown event: ${JSON.stringify(event)}`);
+
+      const beaconUserId = event.source.userId;
+        const checkinCollection = database.collection('checkins');
+        const existingCheckin = await checkinCollection.findOne({ userId: beaconUserId });
+
+        // Get current date in 'YYYY-MM-DD' format
+        const currentDate = new Date().toISOString().split('T')[0];
+
+        if (existingCheckin) {
+          // Extract the date of the last check-in
+          const lastCheckinDate = new Date(existingCheckin.checkinTime).toISOString().split('T')[0];
+
+          if (lastCheckinDate === currentDate) {
+            // User has already checked in today
+            return replyText(event.replyToken, 'คุณได้เช็คอินไปแล้ววันนี้');
+          } else {
+            // Allow check-in if it's a new day
+            const currentTime = new Date();
+            await checkinCollection.updateOne(
+              { userId: beaconUserId },
+              { $set: { checkinTime: currentTime } }
+            );
+            return replyText(event.replyToken, `เช็คอินสำเร็จสำหรับวันนี้ เวลา: ${currentTime}`);
+          }
+        } else {
+          // First time check-in, log the current time
+          const currentTime = new Date();
+          await checkinCollection.insertOne({
+            userId: beaconUserId,
+            checkinTime: currentTime,
+          });
+          
+          return replyText(event.replyToken, `เช็คอินสำเร็จสำหรับวันนี้ เวลา: ${currentTime}`);
+        }
+       default:
+        throw new Error(`Unknown event: ${JSON.stringify(event)}`);
   }
 } catch (error) {
   console.error('Error handling event and saving to MongoDB:', error);
 }
+    
 }
 
 async function deleteUserData(userId, replyToken) {
