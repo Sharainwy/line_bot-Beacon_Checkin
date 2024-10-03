@@ -213,7 +213,7 @@ const replyText = (token, texts) => {
     // default:
     //   throw new Error(`Unknown event: ${JSON.stringify(event)}`);
 
-      const beaconUserId = event.source.userId;
+     const beaconUserId = event.source.userId;
         const checkinCollection = database.collection('checkins');
         const existingCheckin = await checkinCollection.findOne({ userId: beaconUserId });
 
@@ -234,6 +234,17 @@ const replyText = (token, texts) => {
               { userId: beaconUserId },
               { $set: { checkinTime: currentTime } }
             );
+
+            // Send data to WebSocket (only for new check-ins)
+            const dataToSend = {
+              userId: beaconUserId,
+              checkinTime: currentTime,
+              message: 'เช็คอินสำเร็จสำหรับวันนี้'
+            };
+            wss.clients.forEach(async (client) => {
+              client.send(JSON.stringify(dataToSend));
+            });
+
             return replyText(event.replyToken, `เช็คอินสำเร็จสำหรับวันนี้ เวลา: ${currentTime}`);
           }
         } else {
@@ -243,10 +254,21 @@ const replyText = (token, texts) => {
             userId: beaconUserId,
             checkinTime: currentTime,
           });
+
+          // Send data to WebSocket (only for new check-ins)
+          const dataToSend = {
+            userId: beaconUserId,
+            checkinTime: currentTime,
+            message: 'เช็คอินสำเร็จสำหรับวันนี้'
+          };
+          wss.clients.forEach(async (client) => {
+            client.send(JSON.stringify(dataToSend));
+          });
           
           return replyText(event.replyToken, `เช็คอินสำเร็จสำหรับวันนี้ เวลา: ${currentTime}`);
         }
-       default:
+
+      default:
         throw new Error(`Unknown event: ${JSON.stringify(event)}`);
   }
 } catch (error) {
