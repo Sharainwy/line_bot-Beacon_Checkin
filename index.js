@@ -152,9 +152,9 @@ async function handleBeacon(event, database) {
   const formattedTime = bangkokTime.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
   
   if (existingCheckin) {
-    const lastCheckinDate = new Date(existingCheckin.checkinTime).toISOString().split('T')[0];
+    const lastCheckinDate = new Date(existingCheckin.checkinTime).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
 
-    if (lastCheckinDate === currentDate) {
+    if (lastCheckinDate === formattedTime) {
       return await replyText(event.replyToken, 'คุณได้เช็คอินไปแล้ววันนี้');
     } else {
       await checkinCollection.updateOne(
