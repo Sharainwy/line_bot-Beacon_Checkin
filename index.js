@@ -211,7 +211,8 @@ async function handleBeacon(event, database) {
 
   const name = userProfile.displayName + " : " + userProfile.firstname;
   const currentTime = new Date();
-  const bangkokTime = new Date(currentTime.getTime());
+  // const bangkokTime = new Date(currentTime.getTime());
+  const bangkokTime = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Bangkok"}));
   const currentCheckinDate = bangkokTime.toLocaleDateString('th-TH');
   const currentHour = bangkokTime.getHours();
 
@@ -296,6 +297,7 @@ async function handleBeacon(event, database) {
           });
           period = "บ่าย";
       } else {
+          console.log("Current Server Time: " + bangkokTime.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }));
           return await replyText(event.replyToken, `ไม่สามารถเช็คอินได้ในขณะนี้ เนื่องจากไม่อยู่ในช่วงเวลาเช็คอินที่กำหนด`);
       }
   }
@@ -320,6 +322,7 @@ async function handleBeacon(event, database) {
   });
 
   // ตอบกลับผู้ใช้ว่าเช็คอินสำเร็จ
+  console.log("Current Server Time: " + bangkokTime.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }));
   return await replyText(event.replyToken, `เช็คอินสำเร็จสำหรับช่วง${period} เวลา: ${bangkokTime.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })}`);
 }
 
