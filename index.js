@@ -219,7 +219,7 @@ async function handleBeacon(event, database) {
   const currentTime = new Date();
   const GMTTime = new Date(currentTime.getTime()); 
   const bangkokTime = new Date(currentTime.getTime() + (7 * 60 * 60 * 1000));  // Current time in Bangkok
-  const currentCheckinDate = bangkokTime.toLocaleDateString('th-TH', { timeZone: 'America/Phoenix' });
+  const currentCheckinDate = bangkokTime.toLocaleDateString('th-TH', { timeZone: 'Africa/Accra' });
   
 
   const currentHour = bangkokTime.getHours();
@@ -255,7 +255,7 @@ async function handleBeacon(event, database) {
                   {
                       $set: {
                           morningCheckin: true,
-                          morningCheckinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'America/Phoenix' }),
+                          morningCheckinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' }),
                           morningCheckinCount: checkinCountMorning,
                       }
                   }
@@ -274,7 +274,7 @@ async function handleBeacon(event, database) {
                   {
                       $set: {
                           afternoonCheckin: true,
-                          afternoonCheckinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'America/Phoenix' }),
+                          afternoonCheckinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' }),
                           afternoonCheckinCount: checkinCountAfternoon,
                       }
                   }
@@ -292,9 +292,9 @@ async function handleBeacon(event, database) {
           checkinCountMorning = 1;
           await checkinCollection.insertOne({
               userId: beaconUserId,
-              checkinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'America/Phoenix' }),
+              checkinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' }),
               morningCheckin: true,
-              morningCheckinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'America/Phoenix' }),
+              morningCheckinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' }),
               morningCheckinCount: checkinCountMorning
           });
           period = "เช้า";
@@ -302,9 +302,9 @@ async function handleBeacon(event, database) {
           checkinCountAfternoon = 1;
           await checkinCollection.insertOne({
               userId: beaconUserId,
-              checkinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'America/Phoenix' }),
+              checkinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' }),
               afternoonCheckin: true,
-              afternoonCheckinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'America/Phoenix' }),
+              afternoonCheckinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' }),
               afternoonCheckinCount: checkinCountAfternoon
           });
           period = "บ่าย";
@@ -324,7 +324,7 @@ async function handleBeacon(event, database) {
       pictureUrl: userProfile.picture,
       statusMessage: userProfile.position,
       occupplace: userProfile.location,
-      checkinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'America/Phoenix' })
+      checkinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' })
   };
 
   // ส่งข้อมูลไปยัง WebSocket clients
@@ -335,7 +335,7 @@ async function handleBeacon(event, database) {
   });
 
   // ตอบกลับผู้ใช้ว่าเช็คอินสำเร็จ
-  return await replyText(event.replyToken, `เช็คอินสำเร็จสำหรับช่วง${period} เวลา: ${bangkokTime.toLocaleString('th-TH', { timeZone: 'America/Phoenix' })}`);
+  return await replyText(event.replyToken, `เช็คอินสำเร็จสำหรับช่วง${period} เวลา: ${bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' })}`);
 }
 
 
