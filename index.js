@@ -310,7 +310,6 @@ async function handleBeacon(event, database) {
           period = "บ่าย";
       } else {
           console.log( 'currentCheckinDate : '+ currentCheckinDate);
-          console.log( 'currentCheckinDate : '+ currentCheckinDateTime);
           console.log( 'currentCheckinDate : '+ bangkokTime);
           return await replyText(event.replyToken, `ไม่สามารถเช็คอินได้ในขณะนี้ เนื่องจากไม่อยู่ในช่วงเวลาเช็คอินที่กำหนด`);
       }
