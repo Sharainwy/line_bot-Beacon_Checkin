@@ -210,11 +210,18 @@ async function handleBeacon(event, database) {
   const userProfile = await userProfileCollection.findOne({ userId: beaconUserId });
 
   const name = userProfile.displayName + " : " + userProfile.firstname;
+  // const currentTime = new Date();
+  // const bangkokTime = new Date(currentTime.getTime());
+  // const currentCheckinDate = bangkokTime.toLocaleDateString('th-TH', { timeZone: 'Asia/Bangkok' });
+  // const currentHour = bangkokTime.getHours();
+  // Localhost Time
+
   const currentTime = new Date();
-  const bangkokTime = new Date(currentTime.getTime());
+  const bangkokTime = new Date(currentTime.getTime() + (7 * 60 * 60 * 1000));  // Current time in Bangkok
   const currentCheckinDate = bangkokTime.toLocaleDateString('th-TH', { timeZone: 'Asia/Bangkok' });
-  
   const currentHour = bangkokTime.getHours();
+ // Deploy on Render.com Time 
+  
 
   // ฟิลด์สำหรับตรวจสอบการเช็คอินในแต่ละช่วง
   let checkinCountMorning = 0;
