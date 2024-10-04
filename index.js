@@ -222,7 +222,7 @@ async function handleBeacon(event, database) {
   // กำหนดช่วงเวลาเช็คอิน
   const morningStartHour = 6;
   const morningEndHour = 9;
-  const afternoonStartHour = 16;
+  const afternoonStartHour = 15;
   const afternoonEndHour = 19;
 
   let period = "";  // สำหรับเก็บข้อมูลช่วงเวลา (เช้า/บ่าย)
