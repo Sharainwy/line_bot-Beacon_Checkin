@@ -233,7 +233,7 @@ async function handleBeacon(event, database) {
       const lastCheckinDate = existingCheckin.checkinTime.split(' ')[0];
       const morningCheckin = existingCheckin.morningCheckin || false;
       const afternoonCheckin = existingCheckin.afternoonCheckin || false;
-
+      
       // เช็คอินเช้า
       if (lastCheckinDate === currentCheckinDate && currentHour >= morningStartHour && currentHour < morningEndHour) {
           if (morningCheckin) {
@@ -272,7 +272,9 @@ async function handleBeacon(event, database) {
               period = "บ่าย";
           }
       } else {
+          
           return await replyText(event.replyToken, `ไม่สามารถเช็คอินได้ เนื่องจากไม่อยู่ในช่วงเวลาเช็คอินที่กำหนด`);
+          
       }
   } else {
       // เช็คอินครั้งแรกของวัน
@@ -297,6 +299,8 @@ async function handleBeacon(event, database) {
           });
           period = "บ่าย";
       } else {
+          console.log( 'currentCheckinDate : '+ currentCheckinDate);
+          console.log( 'currentCheckinDate : '+ bangkokTime);
           return await replyText(event.replyToken, `ไม่สามารถเช็คอินได้ในขณะนี้ เนื่องจากไม่อยู่ในช่วงเวลาเช็คอินที่กำหนด`);
       }
   }
