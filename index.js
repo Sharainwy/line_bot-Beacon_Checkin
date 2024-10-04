@@ -212,7 +212,7 @@ async function handleBeacon(event, database) {
   const name = userProfile.displayName + " : " + userProfile.firstname;
   const currentTime = new Date();
   // const bangkokTime = new Date(currentTime.getTime());
-  const bangkokTime = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Bangkok"}));
+  const bangkokTime = new Date(new Date().toLocaleString("th-TH", {timeZone: "Asia/Bangkok"}));
   const currentCheckinDate = bangkokTime.toLocaleDateString('th-TH');
   const currentHour = bangkokTime.getHours();
 
