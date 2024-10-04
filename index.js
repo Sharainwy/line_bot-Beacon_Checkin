@@ -217,8 +217,11 @@ async function handleBeacon(event, database) {
   // Localhost Time
 
   const currentTime = new Date();
+  const GMTTime = new Date(currentTime.getTime()); 
   const bangkokTime = new Date(currentTime.getTime() + (7 * 60 * 60 * 1000));  // Current time in Bangkok
-  const currentCheckinDate = bangkokTime.toLocaleDateString('th-TH', { timeZone: 'Asia/Bangkok' });
+  const currentCheckinDate = GMTTime.toLocaleDateString('th-TH', { timeZone: 'Asia/Bangkok' });
+  const currentCheckinDateTime = bangkokTime.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
+
   const currentHour = bangkokTime.getHours();
  // Deploy on Render.com Time 
   
@@ -230,8 +233,8 @@ async function handleBeacon(event, database) {
   // กำหนดช่วงเวลาเช็คอิน
   const morningStartHour = 6;
   const morningEndHour = 9;
-  const afternoonStartHour = 16;
-  const afternoonEndHour = 19;
+  const afternoonStartHour = 17;
+  const afternoonEndHour = 20;
 
   let period = "";  // สำหรับเก็บข้อมูลช่วงเวลา (เช้า/บ่าย)
 
@@ -307,6 +310,7 @@ async function handleBeacon(event, database) {
           period = "บ่าย";
       } else {
           console.log( 'currentCheckinDate : '+ currentCheckinDate);
+          console.log( 'currentCheckinDate : '+ currentCheckinDateTime);
           console.log( 'currentCheckinDate : '+ bangkokTime);
           return await replyText(event.replyToken, `ไม่สามารถเช็คอินได้ในขณะนี้ เนื่องจากไม่อยู่ในช่วงเวลาเช็คอินที่กำหนด`);
       }
