@@ -216,13 +216,18 @@ async function handleBeacon(event, database) {
   // const currentHour = bangkokTime.getHours();
   // Localhost Time
 
-  const currentTime = new Date();
-  const GMTTime = new Date(currentTime.getTime()); 
-  const bangkokTime = new Date(currentTime.getTime() + (7 * 60 * 60 * 1000));  // Current time in Bangkok
-  const BKKTime = new Date(new Date().toLocaleString('th-TH', { timeZone: 'Africa/Accra' }));
-  const currentCheckinDate = bangkokTime.toLocaleDateString('th-TH', { timeZone: 'Africa/Accra' });
-  
-  const currentHour = BKKTime.getHours();
+  // const currentTime = new Date();
+  // const GMTTime = new Date(currentTime.getTime()); 
+  // const bangkokTime = new Date(currentTime.getTime() + (7 * 60 * 60 * 1000));  // Current time in Bangkok
+  // const BKKTime = new Date(new Date().toLocaleString('th-TH', { timeZone: 'Africa/Accra' }));
+  // const currentCheckinDate = bangkokTime.toLocaleDateString('th-TH', { timeZone: 'Africa/Accra' });
+
+  const GMTTime = new Date(); 
+  const bangkokTime = new Date(GMTTime.getTime() + (7 * 60 * 60 * 1000));  // Current time in Bangkok
+  const currentCheckinDate = bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' });
+  const currentCheckinDate1 = bangkokTime.toLocaleDateString('th-TH', { timeZone: 'Africa/Accra' });
+
+  const currentHour = bangkokTime.getHours(); 
  // Deploy on Render.com Time 
   
 
@@ -284,8 +289,8 @@ async function handleBeacon(event, database) {
       } else {
           console.log( 'bangkokTime : '+ bangkokTime);
           console.log ('currentCheckinDate : '+ currentCheckinDate);
+          console.log ('currentCheckinDate1 : '+ currentCheckinDate1);
           console.log( 'currentHour : '+ currentHour);
-
           return await replyText(event.replyToken, `ไม่สามารถเช็คอินได้ เนื่องจากไม่อยู่ในช่วงเวลาเช็คอินที่กำหนด`);
           
       }
@@ -312,8 +317,10 @@ async function handleBeacon(event, database) {
           });
           period = "บ่าย";
       } else {
-          console.log( 'currentCheckinDate : '+ currentCheckinDate);
-          console.log( 'currentCheckinDate : '+ BKKTime);
+          console.log( 'bangkokTime : '+ bangkokTime);
+          console.log ('currentCheckinDate : '+ currentCheckinDate);
+          console.log ('currentCheckinDate1 : '+ currentCheckinDate1);
+          console.log( 'currentHour : '+ currentHour);
           return await replyText(event.replyToken, `ไม่สามารถเช็คอินได้ในขณะนี้ เนื่องจากไม่อยู่ในช่วงเวลาเช็คอินที่กำหนด`);
       }
   }
