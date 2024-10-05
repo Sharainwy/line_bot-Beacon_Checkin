@@ -219,10 +219,10 @@ async function handleBeacon(event, database) {
   const currentTime = new Date();
   const GMTTime = new Date(currentTime.getTime()); 
   const bangkokTime = new Date(currentTime.getTime() + (7 * 60 * 60 * 1000));  // Current time in Bangkok
+  const BKKTime = new Date(new Date().toLocaleString('th-TH', { timeZone: 'Africa/Accra' }));
   const currentCheckinDate = bangkokTime.toLocaleDateString('th-TH', { timeZone: 'Africa/Accra' });
   
-  const BKK = 7; 
-  const currentHour = bangkokTime.getHours()+BKK;
+  const currentHour = bangkokTime1.getHours();
  // Deploy on Render.com Time 
   
 
@@ -313,6 +313,7 @@ async function handleBeacon(event, database) {
       } else {
           console.log( 'currentCheckinDate : '+ currentCheckinDate);
           console.log( 'currentCheckinDate : '+ bangkokTime);
+          console.log( 'currentCheckinDate : '+ bangkokTime1);
           return await replyText(event.replyToken, `ไม่สามารถเช็คอินได้ในขณะนี้ เนื่องจากไม่อยู่ในช่วงเวลาเช็คอินที่กำหนด`);
       }
   }
