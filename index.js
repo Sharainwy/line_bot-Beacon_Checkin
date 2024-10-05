@@ -222,7 +222,7 @@ async function handleBeacon(event, database) {
   const currentCheckinDate = bangkokTime.toLocaleDateString('th-TH', { timeZone: 'Africa/Accra' });
   
 
-  const currentHour = bangkokTime.getHours();
+  const currentHour = bangkokTime.getHours() - 7 ;
  // Deploy on Render.com Time 
   
 
