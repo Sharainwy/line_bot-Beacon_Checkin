@@ -287,7 +287,11 @@ async function handleBeacon(event, database) {
               period = "บ่าย";
           }
       } else {
-          console.log( userProfile.firstname+userProfile.displayName + 'เช็คอินแล้วช่วง' + period + currentCheckinDate);
+          console.log("GMTTime:", GMTTime); // แสดงวันที่และเวลาปัจจุบัน
+          console.log("bangkokTime:", bangkokTime); // แสดงวันที่และเวลาปัจจุบัน
+          console.log("currentCheckinDate:", currentCheckinHour); // แสดงเฉพาะชั่วโมงที่ถูกต้อง
+          console.log("currentCheckinDate1:", currentCheckinDate); // แสดงเฉพาะชั่วโมงที่ถูกต้อง
+          console.log("currentHour:", currentHour); 
           return await replyText(event.replyToken, `ไม่สามารถเช็คอินได้ เนื่องจากไม่อยู่ในช่วงเวลาเช็คอินที่กำหนด`);
           
       }
@@ -314,8 +318,11 @@ async function handleBeacon(event, database) {
           });
           period = "บ่าย";
       } else {
-          console.log( userProfile.firstname+userProfile.displayName + 'เช็คอินแล้วช่วง' + period + currentCheckinDate);
-
+          console.log("GMTTime:", GMTTime); // แสดงวันที่และเวลาปัจจุบัน
+          console.log("bangkokTime:", bangkokTime); // แสดงวันที่และเวลาปัจจุบัน
+          console.log("currentCheckinDate:", currentCheckinHour); // แสดงเฉพาะชั่วโมงที่ถูกต้อง
+          console.log("currentCheckinDate1:", currentCheckinDate); // แสดงเฉพาะชั่วโมงที่ถูกต้อง
+          console.log("currentHour:", currentHour); 
           return await replyText(event.replyToken, `ไม่สามารถเช็คอินได้ในขณะนี้ เนื่องจากไม่อยู่ในช่วงเวลาเช็คอินที่กำหนด`);
       }
   }
