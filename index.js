@@ -142,65 +142,6 @@ async function handleMessage(event, database) {
 }
 
 
-// // Handle beacon events
-// async function handleBeacon(event, database) {
-//     const beaconUserId = event.source.userId;
-    
-//     const checkinCollection = database.collection('checkins');
-//     const existingCheckin = await checkinCollection.findOne({ userId: beaconUserId });
-
-//     const userProfileCollection = database.collection('liff-user');
-//     const userProfile = await userProfileCollection.findOne({ userId: event.source.userId });
-    
-//     const name = userProfile.displayName + " : " + userProfile.firstname;
-//     const currentTime = new Date();
-//     const bangkokTime = new Date(currentTime.getTime());
-
-//     //const bangkokTime = new Date(currentTime.getTime() + 7 * 1000); // เพิ่มเวลา 7 ชั่วโมง
-//     const currentCheckinDate = bangkokTime.toLocaleDateString('th-TH'); // Current date in 'YYYY-MM-DD' format
-    
-//     if (existingCheckin) {
-//         const lastCheckinDate = existingCheckin.checkinTime.split(' ')[0];; // Last check-in date
-//         // console.log(name);
-//         // console.log(currentCheckinDate);
-//         // console.log(existingCheckin.checkinTime);
-
-//         // เปรียบเทียบวันที่
-//            if (lastCheckinDate === currentCheckinDate) {
-//             const lastCheckinTime = new Date(existingCheckin.checkinTime).toLocaleDateString('th-TH', { timeZone: 'Asia/Bangkok' });
-//             console.log(name + 'ได้เช็คอินแล้วเมื่อเวลา : ' + existingCheckin.checkinTime);
-//             return await replyText(event.replyToken, `คุณได้เช็คอินแล้วเมื่อเวลา ${existingCheckin.checkinTime}`); 
-//         }
-//          else {
-//             await checkinCollection.updateOne(
-//                 { userId: beaconUserId },
-//                 { $set: { checkinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) } } // บันทึกเวลาในรูปแบบ ISO
-//             );
-//         }
-//     } else {
-//         await checkinCollection.insertOne({
-//             userId: beaconUserId,
-//             checkinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }), // บันทึกเวลาในรูปแบบ ISO
-//         });
-//     }
-    
-//     // Send data to WebSocket
-//     const dataToSend = {
-//         userId: beaconUserId,
-//         checkinTime: bangkokTime.toISOString(),
-//         message: 'เช็คอินสำเร็จสำหรับวันนี้',
-//     };
-//     wss.clients.forEach(client => {
-//         if (client.readyState === WebSocket.OPEN) {
-//             client.send(JSON.stringify(dataToSend));
-//         }
-//     });
-//     console.log(name + `เช็คอินสำเร็จสำหรับวันนี้ เวลา: `+ bangkokTime.toISOString('th-TH', { timeZone: 'Asia/Bangkok' }));
-//     return await replyText(event.replyToken, `เช็คอินสำเร็จสำหรับวันนี้ เวลา: ${bangkokTime.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })}`);
-    
-// }
-
-
 // Handle beacon events
 async function handleBeacon(event, database) {
   const beaconUserId = event.source.userId;
@@ -210,124 +151,128 @@ async function handleBeacon(event, database) {
   const userProfile = await userProfileCollection.findOne({ userId: beaconUserId });
 
   const name = userProfile.displayName + " : " + userProfile.firstname;
-  // const currentTime = new Date();
-  // const bangkokTime = new Date(currentTime.getTime());
-  // const currentCheckinDate = bangkokTime.toLocaleDateString('th-TH', { timeZone: 'Asia/Bangkok' });
-  // const currentHour = bangkokTime.getHours();
-  // Localhost Time
 
-  // const currentTime = new Date();
-  // const GMTTime = new Date(currentTime.getTime()); 
-  // const bangkokTime = new Date(currentTime.getTime() + (7 * 60 * 60 * 1000));  // Current time in Bangkok
-  // const BKKTime = new Date(new Date().toLocaleString('th-TH', { timeZone: 'Africa/Accra' }));
-  // const currentCheckinDate = bangkokTime.toLocaleDateString('th-TH', { timeZone: 'Africa/Accra' });
-
+  // Get current time in Bangkok
   const GMTTime = new Date(); 
-  const bangkokTime = new Date(GMTTime.getTime() + (7 * 60 * 60 * 1000));  // Current time in Bangkok
-  const currentCheckinHour = bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' });
+  const bangkokTime = new Date(GMTTime.getTime() + (7 * 60 * 60 * 1000)); // Current time in Bangkok
   const currentCheckinDate = bangkokTime.toLocaleDateString('th-TH', { timeZone: 'Africa/Accra' });
-
   const currentHour = bangkokTime.getHours(); 
- // Deploy on Render.com Time 
-  
 
-  // ฟิลด์สำหรับตรวจสอบการเช็คอินในแต่ละช่วง
-  let checkinCountMorning = 0;
-  let checkinCountAfternoon = 0;
-
-  // กำหนดช่วงเวลาเช็คอิน
+  // Define check-in periods
   const morningStartHour = 6;
   const morningEndHour = 10;
-  const afternoonStartHour = 17;
+  const afternoonStartHour = 14;
   const afternoonEndHour = 20;
 
-  let period = "";  // สำหรับเก็บข้อมูลช่วงเวลา (เช้า/บ่าย)
+  let period = "";  // To hold the check-in period (morning/afternoon)
 
   if (existingCheckin) {
-      // แยกการเช็คอินเช้าและเย็นในเอกสารที่มีอยู่
-      const lastCheckinDate = existingCheckin.checkinTime.split(' ')[0];
-      const morningCheckin = existingCheckin.morningCheckin || false;
-      const afternoonCheckin = existingCheckin.afternoonCheckin || false;
-      
-      // เช็คอินเช้า
-      if (lastCheckinDate === currentCheckinDate && currentHour >= morningStartHour && currentHour < morningEndHour) {
-          if (morningCheckin) {
-              return await replyText(event.replyToken, `คุณได้เช็คอินช่วงเช้าแล้วเวลา ${existingCheckin.morningCheckinTime}`);
+      // Check if the user has already checked in for today
+      let currentDayCheckin = existingCheckin.history.find(item => item.date === currentCheckinDate);
+
+      // If the user has a record for today, update their check-in status
+      if (currentDayCheckin) {
+          if (currentHour >= morningStartHour && currentHour < morningEndHour) {
+              if (currentDayCheckin.morningCheckin) {
+                  return await replyText(event.replyToken, `คุณได้เช็คอินช่วงเช้าแล้วเวลา ${currentDayCheckin.morningCheckinTime}`);
+              } else {
+                  currentDayCheckin.morningCheckin = true;
+                  currentDayCheckin.morningCheckinTime = bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' });
+                  currentDayCheckin.morningCheckinCount++;
+                  period = "เช้า";
+              }
+          } else if (currentHour >= afternoonStartHour && currentHour < afternoonEndHour) {
+              if (currentDayCheckin.afternoonCheckin) {
+                  return await replyText(event.replyToken, `คุณได้เช็คอินช่วงบ่ายแล้วเวลา ${currentDayCheckin.afternoonCheckinTime}`);
+              } else {
+                  currentDayCheckin.afternoonCheckin = true;
+                  currentDayCheckin.afternoonCheckinTime = bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' });
+                  currentDayCheckin.afternoonCheckinCount++;
+                  period = "บ่าย";
+              }
           } else {
-              checkinCountMorning = (existingCheckin.morningCheckinCount || 0) + 1;
-              await checkinCollection.updateOne(
-                  { userId: beaconUserId },
-                  {
-                      $set: {
-                          morningCheckin: true,
-                          morningCheckinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' }),
-                          morningCheckinCount: checkinCountMorning,
-                      }
-                  }
-              );
-              period = "เช้า";
+              return await replyText(event.replyToken, `ไม่สามารถเช็คอินได้ เนื่องจากไม่อยู่ในช่วงเวลาเช็คอินที่กำหนด`);
           }
-      }
-      // เช็คอินบ่าย
-      else if (lastCheckinDate === currentCheckinDate && currentHour >= afternoonStartHour && currentHour < afternoonEndHour) {
-          if (afternoonCheckin) {
-              return await replyText(event.replyToken, `คุณได้เช็คอินช่วงบ่ายแล้วเวลา ${existingCheckin.afternoonCheckinTime}`);
-          } else {
-              checkinCountAfternoon = (existingCheckin.afternoonCheckinCount || 0) + 1;
-              await checkinCollection.updateOne(
-                  { userId: beaconUserId },
-                  {
-                      $set: {
-                          afternoonCheckin: true,
-                          afternoonCheckinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' }),
-                          afternoonCheckinCount: checkinCountAfternoon,
-                      }
-                  }
-              );
-              period = "บ่าย";
-          }
+
+          // Update the checkin collection with the new data for today
+          await checkinCollection.updateOne(
+              { userId: beaconUserId },
+              { $set: { history: existingCheckin.history } }
+          );
       } else {
-          console.log("GMTTime:", GMTTime); // แสดงวันที่และเวลาปัจจุบัน
-          console.log("bangkokTime:", bangkokTime); // แสดงวันที่และเวลาปัจจุบัน
-          console.log("currentCheckinDate:", currentCheckinHour); // แสดงเฉพาะชั่วโมงที่ถูกต้อง
-          console.log("currentCheckinDate1:", currentCheckinDate); // แสดงเฉพาะชั่วโมงที่ถูกต้อง
-          console.log("currentHour:", currentHour); 
-          return await replyText(event.replyToken, `ไม่สามารถเช็คอินได้ เนื่องจากไม่อยู่ในช่วงเวลาเช็คอินที่กำหนด`);
-          
+          // If it's a new day, add a new check-in record for today
+          let newCheckin = {
+              date: currentCheckinDate,
+              morningCheckin: false,
+              morningCheckinTime: "",
+              morningCheckinCount: 0,
+              afternoonCheckin: false,
+              afternoonCheckinTime: "",
+              afternoonCheckinCount: 0
+          };
+
+          if (currentHour >= morningStartHour && currentHour < morningEndHour) {
+              newCheckin.morningCheckin = true;
+              newCheckin.morningCheckinTime = bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' });
+              newCheckin.morningCheckinCount = 1;
+              period = "เช้า";
+          } else if (currentHour >= afternoonStartHour && currentHour < afternoonEndHour) {
+              newCheckin.afternoonCheckin = true;
+              newCheckin.afternoonCheckinTime = bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' });
+              newCheckin.afternoonCheckinCount = 1;
+              period = "บ่าย";
+          } else {
+              return await replyText(event.replyToken, `ไม่สามารถเช็คอินได้ในขณะนี้ เนื่องจากไม่อยู่ในช่วงเวลาเช็คอินที่กำหนด`);
+          }
+
+          // Add the new check-in record to the user's history
+          existingCheckin.history.push(newCheckin);
+
+          // Update the database with the new history
+          await checkinCollection.updateOne(
+              { userId: beaconUserId },
+              { $set: { history: existingCheckin.history } }
+          );
       }
   } else {
-      // เช็คอินครั้งแรกของวัน
+      // If the user is checking in for the first time, create a new record
+      let newCheckin = {
+          userId: beaconUserId,
+          history: []
+      };
+
+      let checkinForToday = {
+          date: currentCheckinDate,
+          morningCheckin: false,
+          morningCheckinTime: "",
+          morningCheckinCount: 0,
+          afternoonCheckin: false,
+          afternoonCheckinTime: "",
+          afternoonCheckinCount: 0
+      };
+
       if (currentHour >= morningStartHour && currentHour < morningEndHour) {
-          checkinCountMorning = 1;
-          await checkinCollection.insertOne({
-              userId: beaconUserId,
-              checkinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' }),
-              morningCheckin: true,
-              morningCheckinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' }),
-              morningCheckinCount: checkinCountMorning
-          });
+          checkinForToday.morningCheckin = true;
+          checkinForToday.morningCheckinTime = bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' });
+          checkinForToday.morningCheckinCount = 1;
           period = "เช้า";
       } else if (currentHour >= afternoonStartHour && currentHour < afternoonEndHour) {
-          checkinCountAfternoon = 1;
-          await checkinCollection.insertOne({
-              userId: beaconUserId,
-              checkinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' }),
-              afternoonCheckin: true,
-              afternoonCheckinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' }),
-              afternoonCheckinCount: checkinCountAfternoon
-          });
+          checkinForToday.afternoonCheckin = true;
+          checkinForToday.afternoonCheckinTime = bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' });
+          checkinForToday.afternoonCheckinCount = 1;
           period = "บ่าย";
       } else {
-          console.log("GMTTime:", GMTTime); // แสดงวันที่และเวลาปัจจุบัน
-          console.log("bangkokTime:", bangkokTime); // แสดงวันที่และเวลาปัจจุบัน
-          console.log("currentCheckinDate:", currentCheckinHour); // แสดงเฉพาะชั่วโมงที่ถูกต้อง
-          console.log("currentCheckinDate1:", currentCheckinDate); // แสดงเฉพาะชั่วโมงที่ถูกต้อง
-          console.log("currentHour:", currentHour); 
           return await replyText(event.replyToken, `ไม่สามารถเช็คอินได้ในขณะนี้ เนื่องจากไม่อยู่ในช่วงเวลาเช็คอินที่กำหนด`);
       }
+
+      // Add today's check-in to the new user's history
+      newCheckin.history.push(checkinForToday);
+
+      // Insert the new check-in document into the collection
+      await checkinCollection.insertOne(newCheckin);
   }
 
-  // ข้อมูลที่ส่งไปยัง WebSocket clients
+  // Data to send to WebSocket clients
   const dataToSend = {
       type: 'beacon',
       userId: userProfile.userId,
@@ -339,18 +284,17 @@ async function handleBeacon(event, database) {
       checkinTime: bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' })
   };
 
-  // ส่งข้อมูลไปยัง WebSocket clients
+  // Send data to WebSocket clients
   wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
           client.send(JSON.stringify(dataToSend));
       }
   });
 
-  // ตอบกลับผู้ใช้ว่าเช็คอินสำเร็จ
-  console.log( userProfile.firstname+userProfile.displayName + 'เช็คอินช่วง' + period + currentCheckinHour);
+  // Respond to user confirming successful check-in
+  console.log(name+' เช็คอินสำเร็จสำหรับช่วง'+period+' : '+bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' }));
   return await replyText(event.replyToken, `เช็คอินสำเร็จสำหรับช่วง${period} เวลา: ${bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' })}`);
 }
-
 
 
 // Reply to different message types
@@ -392,4 +336,3 @@ const port = config.port;
 server.listen(port, () => {
   console.log(`Listening on ${port}`);
 });
-
