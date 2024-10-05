@@ -282,8 +282,9 @@ async function handleBeacon(event, database) {
               period = "บ่าย";
           }
       } else {
-          console.log( 'currentCheckinDate : '+ bangkokTime);
-          console.log( 'currentCheckinDate : '+ currentHour);
+          console.log( 'bangkokTime : '+ bangkokTime);
+          console.log ('currentCheckinDate : '+ currentCheckinDate);
+          console.log( 'currentHour : '+ currentHour);
 
           return await replyText(event.replyToken, `ไม่สามารถเช็คอินได้ เนื่องจากไม่อยู่ในช่วงเวลาเช็คอินที่กำหนด`);
           
