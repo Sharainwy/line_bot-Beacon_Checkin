@@ -237,7 +237,7 @@ async function handleBeacon(event, database) {
 
   // กำหนดช่วงเวลาเช็คอิน
   const morningStartHour = 6;
-  const morningEndHour = 9;
+  const morningEndHour = 10;
   const afternoonStartHour = 17;
   const afternoonEndHour = 20;
 
@@ -287,10 +287,7 @@ async function handleBeacon(event, database) {
               period = "บ่าย";
           }
       } else {
-          console.log( 'bangkokTime : '+ bangkokTime);
-          console.log ('currentCheckinDate : '+ currentCheckinDate);
-          console.log ('currentCheckinDate1 : '+ currentCheckinDate1);
-          console.log( 'currentHour : '+ currentHour);
+          console.log( userProfile.firstname+userProfile.displayName + 'เช็คอินช่วง' + period + currentCheckinDate);
           return await replyText(event.replyToken, `ไม่สามารถเช็คอินได้ เนื่องจากไม่อยู่ในช่วงเวลาเช็คอินที่กำหนด`);
           
       }
@@ -317,10 +314,8 @@ async function handleBeacon(event, database) {
           });
           period = "บ่าย";
       } else {
-          console.log( 'bangkokTime : '+ bangkokTime);
-          console.log ('currentCheckinDate : '+ currentCheckinDate);
-          console.log ('currentCheckinDate1 : '+ currentCheckinDate1);
-          console.log( 'currentHour : '+ currentHour);
+          console.log( userProfile.firstname+userProfile.displayName + 'เช็คอินช่วง' + period + currentCheckinDate);
+
           return await replyText(event.replyToken, `ไม่สามารถเช็คอินได้ในขณะนี้ เนื่องจากไม่อยู่ในช่วงเวลาเช็คอินที่กำหนด`);
       }
   }
@@ -345,6 +340,7 @@ async function handleBeacon(event, database) {
   });
 
   // ตอบกลับผู้ใช้ว่าเช็คอินสำเร็จ
+  console.log( userProfile.firstname+userProfile.displayName + 'เช็คอินช่วง' + period + currentCheckinDate);
   return await replyText(event.replyToken, `เช็คอินสำเร็จสำหรับช่วง${period} เวลา: ${bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' })}`);
 }
 
