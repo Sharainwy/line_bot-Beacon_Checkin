@@ -287,7 +287,7 @@ async function handleBeacon(event, database) {
               period = "บ่าย";
           }
       } else {
-          console.log( userProfile.firstname+userProfile.displayName + 'เช็คอินช่วง' + period + currentCheckinDate);
+          console.log( userProfile.firstname+userProfile.displayName + 'เช็คอินแล้วช่วง' + period + currentCheckinDate);
           return await replyText(event.replyToken, `ไม่สามารถเช็คอินได้ เนื่องจากไม่อยู่ในช่วงเวลาเช็คอินที่กำหนด`);
           
       }
@@ -314,7 +314,7 @@ async function handleBeacon(event, database) {
           });
           period = "บ่าย";
       } else {
-          console.log( userProfile.firstname+userProfile.displayName + 'เช็คอินช่วง' + period + currentCheckinDate);
+          console.log( userProfile.firstname+userProfile.displayName + 'เช็คอินแล้วช่วง' + period + currentCheckinDate);
 
           return await replyText(event.replyToken, `ไม่สามารถเช็คอินได้ในขณะนี้ เนื่องจากไม่อยู่ในช่วงเวลาเช็คอินที่กำหนด`);
       }
@@ -340,7 +340,7 @@ async function handleBeacon(event, database) {
   });
 
   // ตอบกลับผู้ใช้ว่าเช็คอินสำเร็จ
-  console.log( userProfile.firstname+userProfile.displayName + 'เช็คอินช่วง' + period + currentCheckinDate);
+  console.log( userProfile.firstname+userProfile.displayName + 'เช็คอินช่วง' + period + currentCheckinHour);
   return await replyText(event.replyToken, `เช็คอินสำเร็จสำหรับช่วง${period} เวลา: ${bangkokTime.toLocaleString('th-TH', { timeZone: 'Africa/Accra' })}`);
 }
 
