@@ -162,7 +162,7 @@ async function handleBeacon(event, database) {
   const morningStartHour = 6;
   const morningEndHour = 10;
   const afternoonStartHour = 14;
-  const afternoonEndHour = 20;
+  const afternoonEndHour = 21;
 
   let period = "";  // To hold the check-in period (morning/afternoon)
 
